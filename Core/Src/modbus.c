@@ -62,8 +62,7 @@ static uint8_t modbusCRC[2] =
 { 0 };
 uint8_t modbusMsgData[20] =
 { 0 };
-uint8_t modbusMsgData9[20] =
-{ '9', '9', '9' };
+
 
 static void crc16(unsigned char *buffer, unsigned short buffer_length)
 {
@@ -91,7 +90,7 @@ const uint8_t SLAVE_ADDR = 0x02;
 //
 // READ BEFORE DEBUGGING!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // ONLY SUPPORTS bool writes
-// ONLY SUPPORTS 8 byte messages
+// can only receive 8 byte messages
 int8_t handleComms(UART_HandleTypeDef *huart, uint16_t *registers)
 {
 
@@ -124,7 +123,24 @@ int8_t handleComms(UART_HandleTypeDef *huart, uint16_t *registers)
 	{
 		//handle read
 		//assume triple read
-		//TODO handle reads
+		uint8_t slaveResponse[11] = {0};
+
+		slaveResponse[0] = SLAVE_ADDR;
+		slaveResponse[1] = 0x03; //read response code
+		slaveResponse[2] = 6; //6 bytes assuming always a triple read
+
+		slaveResponse[4] = (uint8_t) registers[4];
+
+		slaveResponse[6] = (uint8_t) registers[6];
+		slaveResponse[7] = (registers[7] & 0xFF00) >> 8;
+		slaveResponse[8] = registers[8] & 0x00FF;
+
+		crc16(slaveResponse, 9);
+
+		slaveResponse[9] = modbusCRC[0];
+		slaveResponse[10] = modbusCRC[1];
+
+		modBusSend(huart, 11, UART_TIMEOUT);
 
 	}
 	else if (modbusMsgData[1] == 0x06)
