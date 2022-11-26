@@ -121,26 +121,31 @@ int8_t handleComms(UART_HandleTypeDef *huart, uint16_t *registers)
 	//check if read or not
 	if (modbusMsgData[1] == 0x03)
 	{
+		uint8_t messageLength = modbusMsgData[5] * 2 + 5;
+
 		//handle read
-		//assume triple read
-		uint8_t slaveResponse[11] = {0};
+		//assume quad read
+		uint8_t slaveResponse[40] = {0};
 
 		slaveResponse[0] = SLAVE_ADDR;
 		slaveResponse[1] = 0x03; //read response code
-		slaveResponse[2] = 6; //6 bytes assuming always a triple read
+		slaveResponse[2] = 8; //number of read bytes that are being sent
 
-		slaveResponse[4] = (uint8_t) registers[4];
+		slaveResponse[4] = (uint8_t) registers[6];
 
-		slaveResponse[6] = (uint8_t) registers[6];
-		slaveResponse[7] = (registers[7] & 0xFF00) >> 8;
+		slaveResponse[6] = (uint8_t) registers[7];
+		slaveResponse[7] = (registers[8] & 0xFF00) >> 8;
 		slaveResponse[8] = registers[8] & 0x00FF;
 
-		crc16(slaveResponse, 9);
+		slaveResponse[9] = (registers[9] & 0xFF00) >> 8;
+		slaveResponse[10] = registers[9] & 0x00FF;
+		crc16(slaveResponse, messageLength - 2);
 
-		slaveResponse[9] = modbusCRC[0];
-		slaveResponse[10] = modbusCRC[1];
+		slaveResponse[messageLength - 2] = modbusCRC[0];
+		slaveResponse[messageLength - 1] = modbusCRC[1];
+		//HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, 1);
+		modBusSend2(huart, slaveResponse, messageLength, UART_TIMEOUT);
 
-		modBusSend(huart, 11, UART_TIMEOUT);
 
 	}
 	else if (modbusMsgData[1] == 0x06)
@@ -154,6 +159,9 @@ int8_t handleComms(UART_HandleTypeDef *huart, uint16_t *registers)
 
 	}
 
+	//partially reset byte buffer
+	modbusMsgData[0] = 0;
+
 	return 0;
 }
 
@@ -166,6 +174,17 @@ void modBusSend(UART_HandleTypeDef *huart, uint8_t len, uint32_t timeout)
 	//HAL_UART_Transmit(huart, testPoo, len, timeout);
 	HAL_GPIO_WritePin(RS485EN_GPIO_Port, RS485EN_Pin, 0);
 }
+
+void modBusSend2(UART_HandleTypeDef *huart, uint8_t dataBuff[], uint8_t len, uint32_t timeout)
+{
+	//uint8_t testPoo[20] = {0x02, 0x69, 'a', 'A'};
+	HAL_GPIO_WritePin(RS485EN_GPIO_Port, RS485EN_Pin, 1);
+	HAL_Delay(2);
+	HAL_UART_Transmit(huart, dataBuff, len, timeout);
+	//HAL_UART_Transmit(huart, testPoo, len, timeout);
+	HAL_GPIO_WritePin(RS485EN_GPIO_Port, RS485EN_Pin, 0);
+}
+
 
 void simpWrite(UART_HandleTypeDef *huart, uint8_t memAddr, uint8_t data)
 {

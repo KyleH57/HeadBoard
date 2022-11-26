@@ -94,6 +94,8 @@ int main(void)
 	/* USER CODE BEGIN 2 */
 	uint16_t registers[20] =
 	{ 0 };
+
+
 	uint16_t registersOld[20] =
 	{ 0 };
 	/* USER CODE END 2 */
@@ -139,6 +141,8 @@ int main(void)
 		HAL_ADC_Start(&hadc2);
 		HAL_ADC_PollForConversion(&hadc2, 5);
 		registers[8] = (uint16_t) HAL_ADC_GetValue(&hadc2);
+
+		registers[9] = 0xDEAD;
 
 		/* USER CODE BEGIN 3 */
 	}
