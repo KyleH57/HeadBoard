@@ -1,5 +1,5 @@
 ../Core/Src/modbus.c:67:13:crc16	24	static
-../Core/Src/modbus.c:94:8:handleComms	40	static
+../Core/Src/modbus.c:94:8:handleComms	64	static
 ../Core/Src/modbus.c:168:6:modBusSend	24	static
 ../Core/Src/modbus.c:178:6:modBusSend2	24	static
 ../Core/Src/modbus.c:189:6:simpWrite	32	static

@@ -114,19 +114,31 @@ int main(void)
 		//6-7 sensors
 		//8 ADC
 
-		//handle GPIO writes
-		for (int i = 0; i < 5; i++)
-		{
-			//check if there is a change
+//		//handle GPIO writes
+//		for (int i = 0; i < 5; i++)
+//		{
+//			//check if there is a change
+//
+//			if (registers[i] != registersOld[i])
+//			{
+//				//something changed
+//				HAL_GPIO_WritePin(GPIOD, i, registers[i]);
+//
+//			}
+//
+//		}
 
-			if (registers[i] != registersOld[i])
-			{
-				//something changed
-				HAL_GPIO_WritePin(GPIOD, i, registers[i]);
+		//J9
+		HAL_GPIO_WritePin(Solenoid1_GPIO_Port, Solenoid1_Pin, registers[1]);
 
-			}
+		//J10
+		HAL_GPIO_WritePin(Solenoid2_GPIO_Port, Solenoid2_Pin, registers[3]);
 
-		}
+		//J8
+		HAL_GPIO_WritePin(Solenoid3_GPIO_Port, Solenoid3_Pin, registers[2]);
+
+		//J6
+		HAL_GPIO_WritePin(Solenoid4_GPIO_Port, Solenoid4_Pin, registers[0]);
 
 		//register for blue test led
 		HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, registers[5]);
