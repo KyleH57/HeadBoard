@@ -78,8 +78,9 @@ static void crc16(unsigned char *buffer, unsigned short buffer_length)
 		crc_lo = table_crc_lo[i];
 	}
 
-	modbusCRC[0] = crc_hi;
-	modbusCRC[1] = crc_lo;
+	//fixed byte order
+	modbusCRC[0] = crc_lo;
+	modbusCRC[1] = crc_hi;
 }
 
 #define WRONG_ADDRESS -1
